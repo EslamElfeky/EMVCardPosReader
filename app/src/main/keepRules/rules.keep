@@ -1,0 +1,8 @@
+# PAX and EBE SDK Keep Rules
+-keep class com.pax.** { *; }
+-keep interface com.pax.** { *; }
+-dontwarn com.pax.**
+
+-keep class com.ebe.** { *; }
+-keep interface com.ebe.** { *; }
+-dontwarn com.ebe.**
