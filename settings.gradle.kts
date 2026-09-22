@@ -24,3 +24,12 @@ dependencyResolutionManagement {
 
 rootProject.name = "EMVCardPosReader"
 include(":app")
+include(":domain")
+include(":common")
+include(":core:common")
+include(":core:designsystem")
+include(":data:pax-gateway")
+include(":data:host")
+include(":data:local")
+include(":feature:payment")
+include(":feature:history")

@@ -1,19 +1,12 @@
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+/.idea/
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
 
-# PAX SDK and local libraries
-/app/libs/
-*.jar
+# استثناء ملفات PAX الثنائية الاحتكارية - لا ترفع نهائياً لمستودع عام
+data/pax-gateway/src/pax/libs/*.jar

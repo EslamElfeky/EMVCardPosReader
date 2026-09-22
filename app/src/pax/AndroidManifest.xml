@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- أذونات عتاد PAX PayDroid - تُدمج حصرياً في نكهة pax -->
+    <uses-permission android:name="com.pax.permission.ICC" />
+    <uses-permission android:name="com.pax.permission.PICC" />
+    <uses-permission android:name="com.pax.permission.MAGCARD" />
+    <uses-permission android:name="com.pax.permission.PED" />
+    <uses-permission android:name="com.pax.permission.PRINTER" />
+    <uses-permission android:name="com.pax.permission.DEVICEINFO" />
+
+    <queries>
+        <package android:name="com.pax.daemon" />
+        <package android:name="com.pax.edc" />
+    </queries>
+</manifest>
