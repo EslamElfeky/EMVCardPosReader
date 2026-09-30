@@ -1,50 +1,71 @@
 package com.app.emvcard.domain.emv.tlv
 
-import com.app.emvcard.domain.emv.TlvNode
 import com.app.emvcard.domain.emv.toHexString
 
-// 1. Entry point for a single TlvNode
 fun TlvNode.toPrettyTreeString(): String {
     val sb = StringBuilder()
-    renderTree(this, sb, indent = "", isLast = true)
+    renderSingleNode(this, sb)
     return sb.toString()
 }
 
-// 2. Entry point for a List<TlvNode>
 fun List<TlvNode>.toPrettyTreeString(): String {
     val sb = StringBuilder()
     forEachIndexed { index, node ->
-        renderTree(node, sb, indent = "", isLast = index == lastIndex)
+        renderFlatNode(node, sb, isLast = index == lastIndex)
     }
     return sb.toString()
 }
 
-// 3. Private recursive rendering worker function (No extension receiver conflicts)
-private fun renderTree(
-    node: TlvNode,
+fun TlvMap.toPrettyTreeString(): String {
+    val sb = StringBuilder()
+    val entries = elements.entries.toList()
+    entries.forEachIndexed { index, (key, value) ->
+        val isScoped = key.contains("/")
+        val parentPath = if (isScoped) key.substringBeforeLast("/") else null
+        val tagHex = if (isScoped) key.substringAfterLast("/") else key
+        renderElement(tagHex, value, parentPath, sb, isLast = index == entries.lastIndex)
+    }
+    return sb.toString()
+}
+
+private fun renderSingleNode(node: TlvNode, sb: StringBuilder) {
+    val tagName = TlvDictionary.getName(node.tag.hexString)
+    val hexValue = node.value.toHexString()
+    val ascii = getPrintableAscii(node.value)
+    val valueSuffix = if (ascii.isNotEmpty()) " -> \"$ascii\"" else ""
+    val parentPrefix = if (!node.parentTagHex.isNullOrBlank()) "[${node.parentTagHex}] / " else ""
+
+    sb.appendLine("$parentPrefix[${node.tag.hexString}] $tagName (${node.value.size} bytes): $hexValue$valueSuffix")
+}
+
+private fun renderFlatNode(node: TlvNode, sb: StringBuilder, isLast: Boolean) {
+    val branch = if (isLast) "└── " else "├── "
+    val tagName = TlvDictionary.getName(node.tag.hexString)
+    val hexValue = node.value.toHexString()
+    val ascii = getPrintableAscii(node.value)
+    val valueSuffix = if (ascii.isNotEmpty()) " -> \"$ascii\"" else ""
+    val scopeIndicator = if (!node.parentTagHex.isNullOrBlank()) "<${node.parentTagHex}> " else ""
+
+    sb.append(branch)
+    sb.appendLine("$scopeIndicator[${node.tag.hexString}] $tagName (${node.value.size} bytes): $hexValue$valueSuffix")
+}
+
+private fun renderElement(
+    tagHex: String,
+    value: ByteArray,
+    parentPath: String?,
     sb: StringBuilder,
-    indent: String,
     isLast: Boolean
 ) {
-    val branch = if (indent.isEmpty()) "" else if (isLast) "└── " else "├── "
-    val childIndent = if (indent.isEmpty()) "" else if (isLast) "$indent    " else "$indent│   "
-    val tagName = TlvDictionary.getName(node.tag.hexString)
+    val branch = if (isLast) "└── " else "├── "
+    val tagName = TlvDictionary.getName(tagHex)
+    val hexValue = value.toHexString()
+    val ascii = getPrintableAscii(value)
+    val valueSuffix = if (ascii.isNotEmpty()) " -> \"$ascii\"" else ""
+    val scopePrefix = if (parentPath != null) "$parentPath/" else ""
 
-    sb.append(indent)
     sb.append(branch)
-    sb.append("[${node.tag.hexString}] $tagName")
-
-    if (node.isConstructed) {
-        sb.appendLine(" (Constructed, ${node.children.size} items)")
-        node.children.forEachIndexed { index, child ->
-            renderTree(child, sb, childIndent, index == node.children.lastIndex)
-        }
-    } else {
-        val hexValue = node.value.toHexString()
-        val ascii = getPrintableAscii(node.value)
-        val valueSuffix = if (ascii.isNotEmpty()) " -> \"$ascii\"" else ""
-        sb.appendLine(" (${node.value.size} bytes): $hexValue$valueSuffix")
-    }
+    sb.appendLine("[$scopePrefix$tagHex] $tagName (${value.size} bytes): $hexValue$valueSuffix")
 }
 
 private fun getPrintableAscii(bytes: ByteArray): String {

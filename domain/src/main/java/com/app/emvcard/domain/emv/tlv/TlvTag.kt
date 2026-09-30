@@ -1,4 +1,6 @@
-package com.app.emvcard.domain.emv
+package com.app.emvcard.domain.emv.tlv
+
+import com.app.emvcard.domain.emv.toHexString
 
 data class TlvTag(val rowBytes: ByteArray) {
     val hexString: String get()=rowBytes.toHexString()

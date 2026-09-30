@@ -1,37 +1,24 @@
-package com.app.emvcard.domain.emv
+package com.app.emvcard.domain.emv.tlv
 
 data class TlvNode(
     val tag: TlvTag,
     val value: ByteArray,
-    val children: List<TlvNode> = emptyList()
+    val parentTagHex: String? = null
 ) {
-
-    val isConstructed : Boolean get() = tag.isConstructed
-    fun findTag(tagHex: String): TlvNode?{
-        if (tag.hexString.equals(tagHex,ignoreCase = true))
-            return this
-        for (child in children){
-          val found=child.findTag(tagHex)
-          if (found!=null){ return found}
-
-        }
-        return null
-    }
-    fun findTagValue(tagHex: String): ByteArray?=findTag(tagHex)?.value
+    val isConstructed: Boolean get() = tag.isConstructed
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is TlvNode) return false
-
-        return tag==other.tag &&
-                value.contentEquals(other.value) &&
-                children == other.children
+        return tag == other.tag &&
+                parentTagHex == other.parentTagHex &&
+                value.contentEquals(other.value)
     }
 
     override fun hashCode(): Int {
         var result = tag.hashCode()
+        result = 31 * result + (parentTagHex?.hashCode() ?: 0)
         result = 31 * result + value.contentHashCode()
-        result = 31 * result + children.hashCode()
         return result
     }
 }
